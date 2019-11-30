@@ -1,3 +1,4 @@
+const cors = require("cors")({origin: true});
 import { db } from '.';
 import { CreateAccountRequest } from './models/createAccountRequest';
 import { UpdateAccountRequest } from './models/updateAccountRequest';
@@ -6,43 +7,47 @@ import { Account } from './models/account'
 const functions = require('firebase-functions');
 
 export const allAccounts = functions.https.onRequest((request: any, response: any) => {
-    if (request.method === 'GET') {
-        getAllAccounts().then((accs: Account[]) => {
-            response.send(accs);
-        }).catch((err: any) => {
-            response.status(400).send(err);
-        });
-    }
+    cors(request, response, () => {
+        if (request.method === 'GET') {
+            getAllAccounts().then((accs: Account[]) => {
+                response.send(accs);
+            }).catch((err: any) => {
+                response.status(400).send(err);
+            });
+        }
+    });
 });
 
 export const account = functions.https.onRequest((request: any, response: any) => {
-    if (request.method === 'POST') {
-        createAccount(request.body).then((acc: Account) => {
-            response.send(acc);
-        }).catch((err: any) => {
-            response.status(400).send(JSON.stringify(err));
-        });
-    } else if (request.method === 'GET') {
-        getAccount(Number.parseInt(request.query.accountToken)).then((acc: Account) => {
-            response.send(acc);
-        }).catch((err: any) => {
-            response.status(400).send(err);
-        });
-    } else if (request.method === 'PUT') {
-        updateAccount(request.body).then((acc: Account) => {
-            response.send(acc);
-        }).catch((err: any) => {
-            response.status(400).send(err);
-        })
-    } else if (request.method === 'DELETE') {
-        deleteAccount(Number.parseInt(request.query.accountToken)).then((acc: Account) => {
-            response.send(acc);
-        }).catch((err: any) => {
-            response.status(400).send(err);
-        });
-    } else {
-        return response.status(400).send('Please send a supported request type.')
-    }
+    cors(request, response, () => {
+        if (request.method === 'POST') {
+            createAccount(request.body).then((acc: Account) => {
+                response.send(acc);
+            }).catch((err: any) => {
+                response.status(400).send(JSON.stringify(err));
+            });
+        } else if (request.method === 'GET') {
+            getAccount(Number.parseInt(request.query.accountToken)).then((acc: Account) => {
+                response.send(acc);
+            }).catch((err: any) => {
+                response.status(400).send(err);
+            });
+        } else if (request.method === 'PUT') {
+            updateAccount(request.body).then((acc: Account) => {
+                response.send(acc);
+            }).catch((err: any) => {
+                response.status(400).send(err);
+            })
+        } else if (request.method === 'DELETE') {
+            deleteAccount(Number.parseInt(request.query.accountToken)).then((acc: Account) => {
+                response.send(acc);
+            }).catch((err: any) => {
+                response.status(400).send(err);
+            });
+        } else {
+            return response.status(400).send('Please send a supported request type.')
+        }
+    });
 });
 
 async function getAllAccounts(): Promise<Account[]> {
